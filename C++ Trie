@@ -1,0 +1,176 @@
+//
+//  main.cpp
+//  Trie
+//
+//  Created by Naiim Mason on 5/12/16.
+//  Copyright © 2016 Naiim Mason. All rights reserved.
+//
+
+#include <iostream>
+#include <stdio.h>
+#include <cctype>
+#include <vector>
+#include <fstream>
+#include <string>
+#include <algorithm>
+#include <cstring>
+#include <stdlib.h>
+#include <map>
+#include <set>
+using namespace std;
+
+// The nodes that hold the data
+struct Node{
+    char value;
+    Node* children[26] = {NULL};
+    bool eow = false;
+    
+    Node(){
+    }
+    
+    Node(char _value, bool _eow = false){
+        value = _value;
+        eow = _eow;
+    }
+    
+    ~Node(){
+    }
+};
+
+
+class Trie{
+private:
+    // The first letter of every word is tied together in this array
+    
+    
+    // Pseudo-hash for the letters of the alphabet
+    map<char, int> indeces;
+    
+    // Allows the program to jump directly to the root letter
+    void createIndeces(){
+        char alphabet[26] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+        for(int i = 0; i < 26; i++)
+            indeces[alphabet[i]] = i;
+    }
+    
+    void wordHelper(Node* children[], string prefix, string suffix = "", int count = 0){
+        count++;
+        for(int i = 0; i < 26; i++){
+            suffix = suffix.substr(0, count-1);
+            if(children[i] != NULL){
+                suffix+=children[i]->value;
+                if(children[i]->eow)
+                    cout << prefix << suffix << endl;
+                wordHelper(children[i]->children, prefix, suffix, count);
+            }
+        }
+    }
+    
+public:
+    Node* root[26];
+    // The Trie is initialized with all the words in the dictionary
+    Trie(){
+        string line;
+        ifstream myfile ("dictionary.txt");
+        char alphabet[26] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+        
+        for(int i = 0; i < 26; i++){
+            root[i] = new Node(alphabet[i]);
+        }
+        
+        createIndeces();
+        
+        if (myfile.is_open()) {
+            while(getline(myfile,line)){
+                insert(line);
+            }
+            myfile.close();
+        }else{
+            cout << "Unable to open file";
+        }
+    }
+    
+    void insert(string word){
+        long length = word.length();
+        
+        // Begin on the root letter
+        Node* currentNode = root[indeces[word[0]]];
+        
+        for(int i = 1; i < length; i++){
+            Node* newNode;
+            bool _eow = false;
+            int index = indeces[word[i]];
+            
+            // If on the last letter, set eow to true
+            if(i == length-1){
+                newNode = new Node(word[i], true);
+                _eow = true;
+            }else{
+                newNode = new Node(word[i]);
+            }
+            
+            if(currentNode->children[index] == NULL){
+                currentNode->children[index] = newNode;
+                currentNode = newNode;
+            }else{
+                currentNode = currentNode->children[index];
+                if(_eow)
+                    currentNode->eow = _eow;
+            }
+        }
+    }
+    
+    void printWords(){
+        wordHelper(root, "");
+    }
+    
+    bool isPrefix(string word){
+        transform(word.begin(), word.end(), word.begin(), ::tolower);
+        Node* currentNode = root[indeces[word[0]]];
+        for(int i = 1; i < word.size(); i++){
+            currentNode = currentNode->children[indeces[word[i]]];
+            if(currentNode == NULL)
+                return false;
+        }
+        return true;
+    }
+    
+    bool isWord(string word){
+        transform(word.begin(), word.end(), word.begin(), ::tolower);
+        Node* currentNode = root[indeces[word[0]]];
+        for(int i = 1; i < word.size(); i++){
+            currentNode = currentNode->children[indeces[word[i]]];
+            if(currentNode == NULL)
+                return false;
+        }
+        
+        return currentNode->eow;
+    }
+    
+    void contWord(string word){
+        transform(word.begin(), word.end(), word.begin(), ::tolower);
+        Node* currentNode = root[indeces[word[0]]];
+        for(int i = 1; i < word.size(); i++){
+            currentNode = currentNode->children[indeces[word[i]]];
+        }
+        
+        if(currentNode->eow)
+            cout << word << endl;
+        
+        wordHelper(currentNode->children, word);
+    }
+    
+};
+
+int main(int argc, const char * argv[]) {
+    
+    Trie dict;
+    dict.printWords();
+    dict.contWord("hel");
+    cout << dict.isPrefix("hel") << endl;
+    cout << dict.isWord("hel") << endl;
+    
+    return 0;
+}
