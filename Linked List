@@ -1,0 +1,350 @@
+#include <iostream>
+using namespace std;
+
+template <typename T>
+struct Node{
+    T value;
+    Node* next = NULL;
+    Node* previous = NULL;
+    long index = 0;
+    Node(T _value, long _index){
+        value = _value;
+        index = _index;
+    }
+    
+    ~Node(){};
+};
+
+template <typename T>
+class LinkedList{
+private:
+    Node<T>* root = NULL;
+    Node<T>* iterator = NULL;
+    Node<T>* tail = NULL;
+    long length = 0;
+    
+public:
+    LinkedList(){}
+    
+    long size(){return length;}
+    
+    void add(T element){
+        Node<T>* newNode = new Node<T>(element, length);
+        if(length == 0){
+            root = iterator = tail = newNode;
+        }else{
+            newNode->previous = tail;
+            tail->next = newNode;
+            tail = newNode;
+        }
+        length++;
+    }
+    
+    void addAt(T element, long _index){
+        Node<T>* newNode = new Node<T>(element, _index);
+        if(_index >= length || _index < 0)
+            throw out_of_range("Index out of range");
+        Node<T>* currentNode = root;
+        while(currentNode->index != _index)
+            currentNode = currentNode->next;
+        
+        newNode->next = currentNode;
+        newNode->previous = currentNode->previous;
+        currentNode->previous = newNode;
+        if(currentNode != root)
+            currentNode->previous->next = newNode;
+        
+        if(_index == 0)
+            root = newNode;
+        
+        length++;
+        
+        while(currentNode != NULL){
+            currentNode->index++;
+            currentNode = currentNode->next;
+        }
+    }
+    
+    void addFirst(T element){
+        Node<T>* newNode = new Node<T>(element, length);
+        if(length == 0){
+            root = iterator = tail = newNode;
+        }else{
+            newNode->next = root;
+            root->previous = newNode;
+            root = newNode;
+        }
+        length++;
+    }
+    
+    void addLast(T element){
+        Node<T>* newNode = new Node<T>(element, length);
+        if(length == 0){
+            root = iterator = tail = newNode;
+        }else{
+            newNode->previous = tail;
+            tail->next = newNode;
+            tail = newNode;
+        }
+        length++;
+    }
+    
+    bool contains(T element){
+        if(length == 0) return false;
+        Node<T>* currentNode = root;
+        while(currentNode != NULL){
+            if(currentNode->value == element)
+                return true;
+            currentNode = currentNode->next;
+        }
+        return false;
+    }
+    
+    void addAll(T arr[]){
+        for(T element: arr)
+            add(element);
+    }
+    
+    void addAllAt(T arr[], long _index){
+        for(T element: arr){
+            addAt(element, _index);
+            _index++;
+        }
+    }
+    
+    T setAt(long _index, T element){
+        if(_index >= length || _index < 0)
+            throw out_of_range("Index out of range");
+        Node<T>* currentNode = root;
+        while(currentNode->index != _index)
+            currentNode = currentNode->next;
+        currentNode->value = element;
+    }
+    
+    T getAt(long _index){
+        if(_index >= length || _index < 0)
+            throw out_of_range("Index out of range");
+        Node<T>* currentNode = root;
+        while(currentNode->index != _index)
+            currentNode = currentNode->next;
+        return currentNode->value;
+    }
+    
+    T getFirst(){
+        if(length == 0) return NULL;
+        return root->value;
+    }
+    
+    T getLast(){
+        if(length == 0) return NULL;
+        return tail->value;
+    }
+    
+    long indexOf(T element){
+        if(length == 0) return -1;
+        Node<T>* currentNode = root;
+        while(currentNode != NULL){
+            if(currentNode->value == element)
+                return currentNode->index;
+            currentNode = currentNode->next;
+        }
+        return -1;
+    }
+    
+    long lastIndexOf(T element){
+        if(length == 0) return -1;
+        Node<T>* currentNode = tail;
+        while(currentNode != NULL){
+            if(currentNode->value == element)
+                return currentNode->index;
+            currentNode = currentNode->previous;
+        }
+        return -1;
+    }
+    
+    T removeAt(long _index){
+        if(_index >= length || _index < 0)
+            throw out_of_range("Index out of range");
+        Node<T>* currentNode = root;
+        while(currentNode->index != _index)
+            currentNode = currentNode->next;
+        T returnValue = currentNode->value;
+        if(currentNode == root){
+            currentNode->next->previous = currentNode->previous;
+            root = currentNode->next;
+        }else if(currentNode == tail){
+            currentNode->previous->next = currentNode->next;
+            tail = currentNode->previous;
+        }else{
+            currentNode->next->previous = currentNode->previous;
+            currentNode->previous->next = currentNode->next;
+        }
+        currentNode->~Node();
+        length--;
+        return returnValue;
+    }
+    
+    bool removeObject(T _value){
+        Node<T>* currentNode = root;
+        while(currentNode->value != _value){
+            currentNode = currentNode->next;
+            if(currentNode == NULL)
+                return false;
+        }
+        if(currentNode == root){
+            currentNode->next->previous = currentNode->previous;
+            root = currentNode->next;
+        }else if(currentNode == tail){
+            currentNode->previous->next = currentNode->next;
+            tail = currentNode->previous;
+        }else{
+            currentNode->next->previous = currentNode->previous;
+            currentNode->previous->next = currentNode->next;
+        }
+        currentNode->~Node();
+        length--;
+        return true;
+    }
+    
+    bool removeFirstOccurence(T _value){
+        Node<T>* currentNode = root;
+        while(currentNode->value != _value){
+            currentNode = currentNode->next;
+            if(currentNode == NULL)
+                return false;
+        }
+        if(currentNode == root){
+            currentNode->next->previous = currentNode->previous;
+            root = currentNode->next;
+        }else if(currentNode == tail){
+            currentNode->previous->next = currentNode->next;
+            tail = currentNode->previous;
+        }else{
+            currentNode->next->previous = currentNode->previous;
+            currentNode->previous->next = currentNode->next;
+        }
+        currentNode->~Node();
+        length--;
+        return true;
+    }
+    
+    bool removeLastOccurence(T _value){
+        Node<T>* currentNode = tail;
+        while(currentNode->value != _value){
+            currentNode = currentNode->previous;
+            if(currentNode == NULL)
+                return false;
+        }
+        if(currentNode == root){
+            currentNode->next->previous = currentNode->previous;
+            root = currentNode->next;
+        }else if(currentNode == tail){
+            currentNode->previous->next = currentNode->next;
+            tail = currentNode->previous;
+        }else{
+            currentNode->next->previous = currentNode->previous;
+            currentNode->previous->next = currentNode->next;
+        }
+        currentNode->~Node();
+        length--;
+        return true;
+    }
+
+    
+    void printAll(){
+        Node<T>* currentNode = root;
+        while(currentNode != NULL){
+            cout << currentNode->value << " ";
+            currentNode = currentNode->next;
+        }
+        cout << endl;
+    }
+    
+    void printAllReverse(){
+        Node<T>* currentNode = tail;
+        while(currentNode != NULL){
+            cout << currentNode->value << " ";
+            currentNode = currentNode->previous;
+        }
+        cout << endl;
+    }
+    
+    void clearAll(){
+        length = 0;
+        while(root != NULL){
+            Node<T>* next = root->next;
+            delete root;
+            root = next;
+        }
+        
+        root = iterator = tail = NULL;
+    }
+    
+    void reverseSubset(long begin, long end){
+        if(begin >= length-1 || end >= length || begin < 0 || end <= 0){throw out_of_range("Indeces out of range");}
+        if(begin != end){
+            long subStringLength = end - begin;
+            T* arr = new T[subStringLength];
+            Node<T>* currentNode = root;
+            while(currentNode->index != begin){
+                currentNode = currentNode->next;
+            }
+            for(int i = 0; i <= subStringLength; i++){
+                arr[i] = currentNode->value;
+                if(currentNode->index < end)
+                    currentNode = currentNode->next;
+            }
+            for(int i = 0; i <= subStringLength; i++){
+                currentNode->value = arr[i];
+                currentNode = currentNode->previous;
+            }
+            delete[] arr;
+        }
+    }
+    
+    void reverseAll(){
+        if(length != 0){
+            T* arr = new T[length];
+            Node<T>* currentNode = root;
+            for(int i = 0; i < length; i++){
+                arr[i] = currentNode->value;
+                if(currentNode->index < length-1)
+                    currentNode = currentNode->next;
+            }
+            for(int i = 0; i < length; i++){
+                currentNode->value = arr[i];
+                currentNode = currentNode->previous;
+            }
+            delete[] arr;
+        }
+    }
+    
+    bool hasNext(){
+        return iterator->next==NULL;
+    }
+    
+    T next(){
+        T returnValue = iterator->value;
+        iterator = iterator->next;
+        return returnValue;
+    }
+    
+    bool hasPrev(){
+        return iterator->previous==NULL;
+    }
+    
+    T prev(){
+        T returnValue = iterator->value;
+        iterator = iterator->previous;
+        return returnValue;
+    }
+    
+    void restartIteratorFront(){
+        iterator = root;
+    }
+    
+    void restartIteratorBack(){
+        iterator = tail;
+    }
+    
+};
