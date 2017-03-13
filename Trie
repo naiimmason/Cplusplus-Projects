@@ -163,14 +163,3 @@ public:
     }
     
 };
-
-int main(int argc, const char * argv[]) {
-    
-    Trie dict;
-    dict.printWords();
-    dict.contWord("hel");
-    cout << dict.isPrefix("hel") << endl;
-    cout << dict.isWord("hel") << endl;
-    
-    return 0;
-}
