@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <iostream>
+using namespace std;
+
+template <typename T>
+class Queue{
+private:
+    Node<T>* root = NULL;
+    Node<T>* tail = NULL;
+    long length = 0;
+public:
+    Queue(){}
+    
+    void enqueue(T element){
+        Node<T>* newNode = new Node<T>(element);
+        if(length == 0)
+            root = tail = newNode;
+        else{
+            newNode->previous = tail;
+            tail = newNode;
+        }
+        length++;
+    }
+    
+    T dequeue(){
+        if(length==0){throw underflow_error("Underflow");}
+        Node<T>* newRoot = root->next;
+        T returnValue = root->value;
+        root->~Node();
+        root = newRoot;
+        length--;
+        if(length == 0){
+            tail->~Node();
+            tail = NULL;
+        }
+        return returnValue;
+    }
+    
+    T front(){
+        if(length==0){throw underflow_error("Underflow");}
+        return root->value;
+    }
+    
+    T back(){
+        if(length==0){throw underflow_error("Underflow");}
+        return tail->value;
+    }
+};
