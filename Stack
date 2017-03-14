@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <iostream>
+using namespace std;
+
+template <typename T>
+struct Node{
+    T value;
+    Node* next = NULL;
+    Node* previous = NULL;
+    
+    Node(T _value){
+        value = _value;
+    }
+    
+    ~Node(){}
+};
+
+template <typename T>
+class Stack{
+private:
+    Node<T>* tail = NULL;
+    long length = 0;
+public:
+    Stack(){}
+    
+    void push(T element){
+        if(length == 0)
+            tail = new Node<T>(element);
+        else{
+            Node<T>* newNode = new Node<T>(element);
+            newNode->previous = tail;
+            tail = newNode;
+        }
+        length++;
+    }
+    
+    T pop(){
+        if(length==0){throw "No elements to be popped";}
+        Node<T>* newTail = tail->previous;
+        T returnValue = tail->value;
+        tail->~Node();
+        tail = newTail;
+        length--;
+        return returnValue;
+    }
+    
+    bool isEmpty(){return length == 0;}
+    
+};
